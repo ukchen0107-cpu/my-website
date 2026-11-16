@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>番茄鐘工作法｜拾光知識庫</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f8fb;color:#19283b;font-family:system-ui,-apple-system,sans-serif;line-height:1.9}
+nav{background:#17283c;padding:20px max(5%,20px)}
+nav a{color:white;text-decoration:none;font-weight:700}
+main{max-width:800px;margin:50px auto;padding:0 20px}
+article{background:white;padding:clamp(25px,5vw,55px);border-radius:20px;box-shadow:0 8px 35px #17283c0a}
+.tag{color:#2779a7;font-weight:700;font-size:14px}
+h1{font-size:clamp(30px,5vw,42px);line-height:1.35}
+h2{margin-top:35px}
+p,li{color:#4b5c6e}
+.intro{font-size:18px}
+.timer{background:#edf4fa;border-radius:18px;padding:25px;text-align:center;margin:25px 0}
+.clock{font-size:64px;font-weight:800;font-variant-numeric:tabular-nums;color:#17283c}
+button{border:0;border-radius:10px;padding:12px 23px;margin:5px;cursor:pointer;background:#17283c;color:white;font-size:15px}
+button.secondary{background:#d8e2ec;color:#17283c}
+.back{display:inline-block;margin-top:30px;color:#2779a7;text-decoration:none}
+footer{text-align:center;padding:35px;color:#718096}
+</style>
+</head>
+<body>
+<nav><a href="../index.html">✦ 拾光知識庫</a></nav>
+<main>
+<article>
+<span class="tag">學習方法 · 2026-11-16</span>
+<h1>番茄鐘工作法：讓專注變得更簡單</h1>
+<p class="intro">讀書時總是忍不住滑手機？也許你需要的不是更長的讀書時間，而是更有效率的專注方式。</p>
+<h2>什麼是番茄鐘工作法？</h2>
+<p>番茄鐘工作法是一種時間管理方法。常見做法是將工作拆成25分鐘的專注時段，每個時段結束後休息5分鐘。完成約4個時段後，再安排一次較長的休息。</p>
+<h2>如何開始？</h2>
+<ol>
+<li>選擇一項今天想完成的任務。</li>
+<li>設定25分鐘計時器，專心完成任務。</li>
+<li>時間結束後，休息5分鐘。</li>
+<li>重複約4輪，再安排15至30分鐘的長休息。</li>
+</ol>
+<h2>互動番茄鐘</h2>
+<div class="timer">
+<p id="mode">專注時間</p>
+<div class="clock" id="clock">25:00</div>
+<button id="start">開始</button>
+<button id="pause" class="secondary">暫停</button>
+<button id="reset" class="secondary">重設</button>
+<br>
+<button id="focus" class="secondary">25分鐘專注</button>
+<button id="break" class="secondary">5分鐘休息</button>
+</div>
+<h2>使用小建議</h2>
+<p>開始前先把手機通知關閉，並將任務拆成可以完成的小目標。25分鐘只是常見設定，可以依照自己的專注習慣調整。</p>
+<p>如果正在進行需要長時間思考的工作，也不一定要在25分鐘時強制中斷。</p>
+<a class="back" href="../index.html">← 返回知識庫首頁</a>
+</article>
+</main>
+<footer>© 2026 拾光知識庫</footer>
+<script>
+let remaining=1500;
+let duration=1500;
+let interval=null;
+let endAt=0;
+const clock=document.getElementById('clock');
+function display(){
+const m=Math.floor(remaining/60);
+const s=remaining%60;
+clock.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function stop(){if(interval!==null){clearInterval(interval);interval=null;}}
+function tick(){
+remaining=Math.max(0,Math.ceil((endAt-Date.now())/1000));
+display();
+if(remaining===0){stop();document.getElementById('mode').textContent='時間到了！';}
+}
+document.getElementById('start').onclick=()=>{
+if(interval!==null)return;
+if(remaining===0)remaining=duration;
+endAt=Date.now()+remaining*1000;
+interval=setInterval(tick,250);
+display();
+};
+document.getElementById('pause').onclick=()=>{if(interval!==null){tick();stop();}};
+document.getElementById('reset').onclick=()=>{stop();remaining=duration;display();};
+function switchMode(seconds,label){
+stop();duration=seconds;remaining=seconds;
+document.getElementById('mode').textContent=label;display();
+}
+document.getElementById('focus').onclick=()=>switchMode(1500,'專注時間');
+document.getElementById('break').onclick=()=>switchMode(300,'休息時間');
+</script>
+</body>
+</html>
