@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拾光知識庫 | 我的靈感收藏</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#182433;background:#f6f8fb}
+*{box-sizing:border-box}
+body{margin:0}
+header{background:#17283c;color:white;padding:24px max(6%,20px)}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-size:21px;font-weight:800}
+.hero{max-width:850px;margin:75px auto 80px;text-align:center}
+.hero h1{font-size:clamp(32px,6vw,55px);margin-bottom:15px}
+.hero p{color:#c9d5e2;line-height:1.8}
+main{max-width:1100px;margin:auto;padding:45px 20px 90px}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:25px 0}
+input,select{padding:15px;border:1px solid #dbe2ea;border-radius:12px;font-size:16px;background:white}
+input{flex:1;min-width:200px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
+.card{display:block;text-decoration:none;color:inherit;background:white;border:1px solid #e3e8ef;border-radius:18px;padding:25px;transition:.2s}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 30px #18243316}
+.tag{font-size:12px;color:#276c9c;font-weight:700}
+.card h3{margin:14px 0 10px}
+.card p{color:#617080;line-height:1.7}
+.date{font-size:12px;color:#8a96a3}
+.empty{padding:45px;text-align:center;color:#718096}
+footer{text-align:center;padding:30px;color:#718096}
+@media(max-width:600px){.hero{margin:55px auto}.toolbar{flex-direction:column}input,select{width:100%}}
+</style>
+</head>
+<body>
+<header>
+<nav><div class="logo">✦ 拾光知識庫</div><span>My Knowledge Space</span></nav>
+<section class="hero">
+<h1>收藏每一個值得記住的想法。</h1>
+<p>從一個靈感開始，慢慢建立屬於自己的知識宇宙。<br>探索、記錄、整理，讓每次學習都有跡可循。</p>
+</section>
+</header>
+<main>
+<h2>探索我的收藏</h2>
+<p>每一篇紀錄，都是一次新的發現。</p>
+<div class="toolbar">
+<input id="search" placeholder="搜尋文章、主題或關鍵字…" aria-label="搜尋文章">
+<select id="category" aria-label="選擇分類"><option value="">全部分類</option></select>
+</div>
+<div id="articles" class="grid"></div>
+<p id="status" class="empty">正在載入文章…</p>
+</main>
+<footer>© 2026 拾光知識庫 · 持續累積每一份好奇</footer>
+<script>
+let articles=[];
+const grid=document.getElementById('articles');
+const status=document.getElementById('status');
+const search=document.getElementById('search');
+const category=document.getElementById('category');
+function render(){
+const q=search.value.trim().toLowerCase();
+const cat=category.value;
+const filtered=articles.filter(a=>(!cat||a.category===cat)&&[a.title,a.summary,a.category].join(' ').toLowerCase().includes(q));
+grid.replaceChildren();
+filtered.forEach(a=>{
+const link=document.createElement('a');
+link.className='card';
+link.href=a.url;
+const tag=document.createElement('span');tag.className='tag';tag.textContent=a.category;
+const title=document.createElement('h3');title.textContent=a.title;
+const summary=document.createElement('p');summary.textContent=a.summary;
+const date=document.createElement('span');date.className='date';date.textContent=a.date;
+link.append(tag,title,summary,date);
+grid.append(link);
+});
+status.textContent=filtered.length?'':(articles.length?'找不到符合條件的文章。':'目前還沒有文章，準備開始收藏吧！');
+}
+async function load(){
+try{
+const response=await fetch('./data/pages.json');
+if(!response.ok)throw new Error('無法讀取文章索引');
+const data=await response.json();
+if(!Array.isArray(data))throw new Error('文章格式不正確');
+articles=data.filter(a=>a&&typeof a.title==='string'&&typeof a.url==='string'&&typeof a.category==='string'&&typeof a.summary==='string'&&typeof a.date==='string').sort((a,b)=>b.date.localeCompare(a.date));
+[...new Set(articles.map(a=>a.category))].sort().forEach(c=>{
+const option=document.createElement('option');option.value=c;option.textContent=c;category.append(option);
+});
+render();
+}catch(e){status.textContent='文章索引尚未建立或載入失敗，請檢查 data/pages.json。';}
+}
+search.addEventListener('input',render);
+category.addEventListener('change',render);
+load();
+</script>
+</body>
+</html>
